@@ -45,7 +45,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun hasPassword(password: String): String {
         val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
-        return bytes.joinToString(" ") { "%o2x".format(it) }
+        return bytes.joinToString(" ") { "%o2x".format(it) }git
     }
 
     sealed class AuthState {

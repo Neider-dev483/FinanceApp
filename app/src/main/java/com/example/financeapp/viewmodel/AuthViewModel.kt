@@ -43,9 +43,38 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun register(name: String, email: String, password: String) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loanding
+
+            try {
+                val existingUser = UserDao.getUserByEmail(email)
+                if (existingUser != null) {
+                    _authState.value = AuthState.Error("El email ya esta registrado")
+                    return@launch
+                }
+                val newUser = User(
+                    name = name,
+                    email = email,
+                    passwordHash = hasPassword(password)
+                )
+                val userId = UserDao.insert(newUser)
+                _currendUser.value = newUser.copy(id = userId)
+                _authState.value = AuthState.Succes
+            } catch (e: Exception) {
+                _authState.value = AuthState.Error("Error al registrar: ${e.message}")
+            }
+        }
+    }
+
+    fun logout() {
+        _currendUser.value = null
+        _authState.value = AuthState.Idle
+    }
+
     private fun hasPassword(password: String): String {
         val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
-        return bytes.joinToString(" ") { "%o2x".format(it) }git
+        return bytes.joinToString(" ") { "%o2x".format(it) }
     }
 
     sealed class AuthState {

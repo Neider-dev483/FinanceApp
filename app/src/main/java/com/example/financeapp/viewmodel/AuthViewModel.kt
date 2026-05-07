@@ -6,6 +6,7 @@ import android.provider.ContactsContract
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.financeapp.data.dao.UserDao
+import com.example.financeapp.data.database.AppDatabase
 import com.example.financeapp.data.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +18,7 @@ import java.security.MessageDigest
  */
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
-    private val UserDao = AppDatabase.getDatabase(application).userDao()
+    private val UserDao = AppDatabase.getDataBase(application).userDao()
     private val _currendUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currendUser
 
@@ -29,7 +30,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             _authState.value = AuthState.Loanding
 
             try {
-                val user = UserDao.getUserByemail(email)
+                val user = UserDao.getUserByEmail(email)
                 if (user != null && user.passwordHash == hasPassword(password)) {
                     /**LLogin Exitoso*/
                     _currendUser.value = user

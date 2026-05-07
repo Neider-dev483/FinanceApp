@@ -5,10 +5,12 @@ import android.icu.util.Calendar
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Delete
+import com.example.financeapp.data.database.AppDatabase
 import com.example.financeapp.data.model.Budget
 import com.example.financeapp.data.model.ExpenseCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.Month
 import java.time.Year
@@ -18,8 +20,8 @@ class BudgetViewModel(application: Application) : AndroidViewModel(application) 
      * Incializar de DAOs
      */
 
-    private val budgetDao = AppDatabase.getDatabase(application).budgetDao()
-    private val expenseDao = AppDatabase.getDatabase(application).expenseDao()
+    private val budgetDao = AppDatabase.getDataBase(application).bugetDao()
+    private val expenseDao = AppDatabase.getDataBase(application).expenseDao()
     private val _budgets = MutableStateFlow<List<Budget>>(emptyList())
     val budgedts: StateFlow<List<Budget>> = _budgets
 

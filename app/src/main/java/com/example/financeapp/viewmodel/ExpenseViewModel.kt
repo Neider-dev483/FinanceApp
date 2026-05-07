@@ -1,21 +1,19 @@
 package com.example.financeapp.viewmodel
 
-import android.accessibilityservice.GestureDescription
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.financeapp.data.database.AppDatabase
 import com.example.financeapp.data.model.Expense
 import com.example.financeapp.data.model.ExpenseCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.time.Month
-import java.time.Year
 import java.util.Calendar
 
 class ExpenseViewModel(application: Application) : AndroidViewModel(application) {
     //INICIALIZACION DEL DAO
-    private val expenseDao = AppDatabase.getDatabase(application).expenseDao()
+    private val expenseDao = AppDatabase.getDataBase(application).expenseDao()
     private val _expenses = MutableStateFlow<List<Expense>>(emptyList())
     val expenses: StateFlow<List<Expense>> = _expenses
     private val _totalExpense = MutableStateFlow(0.0)
@@ -24,7 +22,7 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
 
     fun loadExpenses(userId: Long) {
         viewModelScope.launch {
-            expenseDao.getExpensesByUser(userId.collect) {
+            expenseDao.getExpensesByUser(userId).collect {
                 _expenses.value = it
             }
         }
@@ -32,18 +30,18 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
 
     fun loadExpenseByMonth(userId: Long, month: Int, year: Int) {
         viewModelScope.launch {
-            val calendar: Calendar.getInstance()
+            val calendar = Calendar.getInstance()
             calendar.set(year, month - 1, 1, 0, 0, 0)
-            val starDate = calendar.timeInMillis
+            val startDate = calendar.timeInMillis
 
             calendar.add(Calendar.MONTH, 1)
             val endDate = calendar.timeInMillis
 
-            expenseDao.getExpenseByDateRange(userId, starDate, endDate).collect {
+            expenseDao.getExpenseByDateRange(userId, startDate, endDate).collect {
                 _expenses.value = it
             }
 
-            expenseDao.getTotalExpensesByDateRange(userId, starDate, endDate).collect {
+            expenseDao.getTotalExpenseByDateRange(userId, startDate, endDate).collect {
                 _totalExpense.value = it
             }
         }

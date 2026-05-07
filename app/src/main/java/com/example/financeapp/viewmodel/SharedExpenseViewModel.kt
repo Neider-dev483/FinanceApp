@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.financeapp.data.dao.SharedExpenseDao
+import com.example.financeapp.data.database.AppDatabase
 import com.example.financeapp.data.model.ExpenseCategory
 import com.example.financeapp.data.model.Participant
 import com.example.financeapp.data.model.SharedExpense
@@ -14,7 +15,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class SharedExpenseViewModel(application: Application) : AndroidViewModel(application) {
-    private val sharedExpenseDao = AppDatabase.getDatabase(application).sharedExpenseDao()
+    private val sharedExpenseDao = AppDatabase.getDataBase(application).sharedExpenseDao()
     private val _sharedExpenses = MutableStateFlow<List<SharedExpense>>(emptyList())
     val sharedExpense: StateFlow<List<SharedExpense>> = _sharedExpenses
     private val _unsettledExpenses = MutableStateFlow<List<SharedExpense>>(emptyList())
@@ -22,7 +23,7 @@ class SharedExpenseViewModel(application: Application) : AndroidViewModel(applic
 
     fun loadShaderExpense(userId: Long) {
         viewModelScope.launch {
-            sharedExpenseDao.getSharedExpenseByUser(userId).collect {
+            sharedExpenseDao.getSharedExpensesByUser(userId).collect {
                 _sharedExpenses.value = it
             }
         }
@@ -30,7 +31,7 @@ class SharedExpenseViewModel(application: Application) : AndroidViewModel(applic
 
     fun loeadunsettledExpeneses(userId: Long) {
         viewModelScope.launch {
-            sharedExpenseDao.getUnsettledSharedExpenseDao(userId).collect {
+            sharedExpenseDao.getUnsettledSharedExpenses(userId).collect {
                 _unsettledExpenses.value = it
             }
         }
@@ -49,7 +50,7 @@ class SharedExpenseViewModel(application: Application) : AndroidViewModel(applic
                 totalAmount = totalAmount,
                 description = description,
                 category = category,
-                participant = participantToJson(participant)
+                participants = participantToJson(participant)
             )
             sharedExpenseDao.insert(sharedExpense)
         }
@@ -57,9 +58,8 @@ class SharedExpenseViewModel(application: Application) : AndroidViewModel(applic
 
     fun markAsSettled(sharedExpense: SharedExpense) {
         viewModelScope.launch {
-            sharedExpenseDao.Update(sharedExpense.copy(settled = true))
+            sharedExpenseDao.update(sharedExpense.copy(settled = true))
         }
-
     }
 
     fun deleteSharedExpense(sharedExpense: SharedExpense) {
@@ -72,7 +72,7 @@ class SharedExpenseViewModel(application: Application) : AndroidViewModel(applic
         val participants = mutableListOf<Participant>()
         val jsonArray = JSONArray(json)
         for (i in 0 until jsonArray.length()) {
-            val obj = json.getJSONObject(i)
+            val obj = jsonArray.getJSONObject(i)
             participants.add(
                 Participant(
                     name = obj.getString("name"),
@@ -91,6 +91,8 @@ class SharedExpenseViewModel(application: Application) : AndroidViewModel(applic
             obj.put("name", participants.name)
             obj.put("amount", participants.amount)
             obj.put("paid", participants.paid)
+            jsonArray.put(obj)
         }
+        return jsonArray.toString()
     }
 }

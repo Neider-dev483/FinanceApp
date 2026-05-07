@@ -29,11 +29,11 @@ interface ExpenseDao {
     @Query("SELECT SUM(amount) FROM expenses WHERE userId = :userId AND date BETWEEN :starDate AND :endDate")
     fun getTotalExpenseByDateRange(userId: Long, starDate: Long, endDate: Long): Flow<Double>
 
-    @Query("SELECT SUM(amount) FROM expenses WHERE userId = :userId AND category= :category AND date BETWEEN :startDate AND :endDAte")
+    @Query("SELECT SUM(amount) FROM expenses WHERE userId = :userId AND category= :category AND date BETWEEN :startDate AND :endDate")
     fun getTotalExpensesByCategoryAndDateRange(
         userId: Long,
         category: ExpenseCategory,
-        starDate: Long,
+        startDate: Long,
         endDate: Long
     ): Flow<Double>
 
